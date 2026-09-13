@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Запасы до пятницы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FBF3E1;
+    --card: #FFFFFF;
+    --ink: #2B2A22;
+    --ink-soft: #746C58;
+    --line: #E7D9B8;
+    --accent: #7C5CFC;
+    --accent-tint: #E7E1FD;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{
+    margin:0; padding:0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Archivo', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body{ min-height:100vh; padding: 20px 16px 48px; }
+
+  .wrap{ max-width: 480px; margin: 0 auto; }
+
+  header{
+    padding: 4px 2px 18px;
+    border-bottom: 3px solid var(--ink);
+    margin-bottom: 18px;
+  }
+
+  .kicker{ font-size: 13px; color: var(--ink-soft); margin-bottom: 2px; }
+
+  h1{
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 1.08;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .range{ font-size: 14px; color: var(--ink-soft); }
+
+  nav.tabs{ display:flex; gap: 6px; margin-bottom: 18px; }
+
+  nav.tabs button{
+    flex:1;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 11px 10px;
+    background: var(--card);
+    border: 3px solid var(--ink);
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    color: var(--ink-soft);
+    cursor: pointer;
+    position: relative;
+    top: 3px;
+  }
+
+  nav.tabs button.active{
+    color: var(--ink);
+    top: 0;
+    box-shadow: 0 -4px 0 var(--accent) inset;
+  }
+
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  /* ---- Callout ---- */
+  .callout{
+    display:flex;
+    gap: 10px;
+    align-items:flex-start;
+    padding: 13px 14px;
+    margin-bottom: 18px;
+    background: var(--accent-tint);
+    border-radius: 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .callout .emo{ font-size: 18px; flex: 0 0 auto; }
+
+  /* ---- Inventory ---- */
+
+  .shelf{ margin-bottom: 22px; }
+
+  .shelf-title{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin: 0 0 10px;
+  }
+
+  .shelf-title .bar{
+    width: 6px;
+    height: 18px;
+    border-radius: 4px;
+    flex: 0 0 auto;
+  }
+
+  .item-row{
+    display:flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+  }
+
+  .icon-circle{
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 16px;
+    flex: 0 0 auto;
+    overflow: hidden;
+  }
+
+  .icon-img{
+    width: 20px;
+    height: 20px;
+    display: block;
+    object-fit: contain;
+  }
+
+  .name-input{
+    flex: 1;
+    min-width: 0;
+    font-family: 'Archivo', sans-serif;
+    font-size: 14.5px;
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 9px;
+    background: var(--card);
+    padding: 8px 10px;
+  }
+  .name-input:focus{ outline: none; border-color: var(--accent); }
+  .name-input::placeholder{ color: #C9BE9E; }
+
+  .amount-input{
+    width: 84px;
+    flex: 0 0 auto;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    text-align: center;
+    border: 1.5px solid var(--line);
+    border-radius: 9px;
+    background: var(--card);
+    padding: 8px 6px;
+  }
+  .amount-input:focus{ outline: none; border-color: var(--accent); }
+  .amount-input::placeholder{ color: #C9BE9E; }
+
+  .delete-btn{
+    flex: 0 0 auto;
+    border: none;
+    background: none;
+    color: #C4415F;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 2px;
+  }
+
+  .add-link{
+    display: inline-block;
+    margin-top: 6px;
+    margin-left: 40px;
+    font-family: 'Archivo', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+
+  .save-status{
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-align: right;
+    margin: -10px 0 14px;
+  }
+  .save-status.ok{ color: #2FA84E; }
+  .save-status.fail{ color: #E23E57; }
+
+  .note-box{
+    margin-top: 6px;
+    padding: 14px 16px;
+    background: var(--accent-tint);
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .error-box{
+    display: none;
+    margin-bottom: 14px;
+    padding: 12px 16px;
+    background: #FBDCE0;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--ink);
+  }
+
+  .dirty-banner{
+    display: none;
+    margin-bottom: 14px;
+    padding: 12px 16px;
+    background: #FDEBC7;
+    border-radius: 14px;
+    font-size: 13.5px;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+  .dirty-banner.show{ display:block; }
+
+  .rebuild-btn{
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .rebuild-btn:disabled{ opacity: 0.55; cursor: default; }
+
+  /* ---- Menu ---- */
+
+  .day-strip{ display:flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 18px; }
+
+  .day-btn{
+    flex: 0 0 auto;
+    min-width: 60px;
+    text-align:center;
+    padding: 10px 6px 9px;
+    border: none;
+    background: var(--card);
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Archivo', sans-serif;
+  }
+
+  .day-btn .dname{ display:block; font-size: 12px; font-weight: 700; color: var(--ink-soft); margin-bottom: 3px; }
+  .day-btn .dnum{ display:block; font-family: 'Fraunces', serif; font-size: 19px; font-weight: 700; color: var(--ink); }
+
+  .day-btn.active{ background: var(--accent); }
+  .day-btn.active .dname{ color: #E7E1FD; }
+  .day-btn.active .dnum{ color: #fff; }
+
+  .meal{ display:flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .meal:last-child{ border-bottom:none; }
+
+  .meal-bar{ flex: 0 0 5px; border-radius: 5px; }
+  .meal.breakfast .meal-bar{ background: #F2994A; }
+  .meal.lunch .meal-bar{ background: #2FA84E; }
+  .meal.dinner .meal-bar{ background: #E23E57; }
+
+  .meal-body{ flex:1; }
+
+  .meal-label{ display:flex; justify-content:space-between; align-items:baseline; font-size: 12px; font-weight: 800; margin: 0 0 4px; }
+  .meal.breakfast .meal-label{ color: #F2994A; }
+  .meal.lunch .meal-label{ color: #2FA84E; }
+  .meal.dinner .meal-label{ color: #E23E57; }
+
+  .meal-kcal{
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .day-total{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    background: var(--ink);
+    color: #fff;
+    border-radius: 12px;
+    font-family: 'Archivo', sans-serif;
+  }
+  .day-total .dt-label{ font-size: 13px; opacity: 0.85; }
+  .day-total .dt-value{ font-family: 'Fraunces', serif; font-weight: 700; font-size: 19px; }
+  .day-total.good{ background: #2FA84E; }
+  .day-total.low{ background: #E23E57; }
+
+  .meal-text{ font-size: 15.5px; line-height: 1.45; color: var(--ink); }
+
+  .meal-text-input{
+    width: 100%;
+    font-family: 'Archivo', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 9px;
+    background: var(--card);
+    padding: 8px 10px;
+    margin-top: 2px;
+  }
+  .meal-text-input:focus{ outline:none; border-color: var(--accent); }
+
+  .meal-kcal-input{
+    width: 64px;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-align: right;
+    border: 1.5px solid var(--line);
+    border-radius: 7px;
+    background: var(--card);
+    padding: 3px 5px;
+  }
+  .meal-kcal-input:focus{ outline:none; border-color: var(--accent); }
+
+  /* ---- Export / Import ---- */
+  .io-row{ display:flex; gap: 8px; margin-bottom: 14px; }
+  .io-btn{
+    flex: 1;
+    padding: 10px;
+    background: var(--card);
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    border-radius: 10px;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+  }
+
+  .io-panel{
+    display: none;
+    margin-bottom: 16px;
+    padding: 14px;
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+  }
+  .io-panel.show{ display:block; }
+
+  .io-hint{ font-size: 12.5px; color: var(--ink-soft); margin: 0 0 8px; line-height: 1.4; }
+
+  .io-text{
+    width: 100%;
+    min-height: 110px;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+    font-size: 12px;
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 9px;
+    padding: 8px;
+    resize: vertical;
+  }
+  .io-text:focus{ outline:none; border-color: var(--accent); }
+
+  .io-actions{ display:flex; gap: 8px; margin-top: 10px; }
+  .io-apply{
+    flex:1;
+    padding: 10px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 9px;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+  }
+  .io-close{
+    padding: 10px 14px;
+    background: none;
+    color: var(--ink-soft);
+    border: 1.5px solid var(--line);
+    border-radius: 9px;
+    font-family: 'Archivo', sans-serif;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+  }
+
+  footer{ margin-top: 24px; font-size: 13px; color: var(--ink-soft); text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">План на неделю</div>
+    <h1>Запасы до пятницы</h1>
+    <div class="range">Воскресенье, 13 сентября — четверг, 17 сентября</div>
+  </header>
+
+  <nav class="tabs">
+    <button class="active" data-tab="inventory">Продукты</button>
+    <button data-tab="menu">Меню</button>
+  </nav>
+
+  <!-- INVENTORY -->
+  <section class="panel active" id="panel-inventory">
+    <div class="callout"><span class="emo">💡</span><span>Эта версия работает как обычный сайт — изменения в продуктах и меню сохраняются в этом браузере автоматически. «Экспорт» / «Импорт» — чтобы перенести данные на другое устройство или синхронизировать с версией в Claude.</span></div>
+    <p class="save-status" id="saveStatus">&nbsp;</p>
+
+    <div class="io-row">
+      <button type="button" class="io-btn" id="exportBtn">📤 Экспорт</button>
+      <button type="button" class="io-btn" id="importBtn">📥 Импорт</button>
+    </div>
+
+    <div class="io-panel" id="ioPanel">
+      <p class="io-hint" id="ioHint"></p>
+      <textarea class="io-text" id="ioText" rows="6"></textarea>
+      <div class="io-actions">
+        <button type="button" class="io-apply" id="ioApplyBtn">Применить</button>
+        <button type="button" class="io-close" id="ioCloseBtn">Закрыть</button>
+      </div>
+    </div>
+
+    <div id="inventoryHost"></div>
+  </section>
+
+  <!-- MENU -->
+  <section class="panel" id="panel-menu">
+
+    <div class="note-box" id="menuNote">Нажмите на текст блюда или на калории, чтобы изменить их. Итог за день считается автоматически. Чтобы пересобрать меню с помощью ИИ, откройте версию в Claude и импортируйте результат сюда через «Импорт».</div>
+
+    <div class="day-strip" id="dayStrip">
+      <button class="day-btn active" data-day="0"><span class="dname">Вс</span><span class="dnum">13</span></button>
+      <button class="day-btn" data-day="1"><span class="dname">Пн</span><span class="dnum">14</span></button>
+      <button class="day-btn" data-day="2"><span class="dname">Вт</span><span class="dnum">15</span></button>
+      <button class="day-btn" data-day="3"><span class="dname">Ср</span><span class="dnum">16</span></button>
+      <button class="day-btn" data-day="4"><span class="dname">Чт</span><span class="dnum">17</span></button>
+    </div>
+
+    <div class="day-total" id="dayTotal"><span class="dt-label">Итого за день</span><span class="dt-value">— ккал</span></div>
+
+    <div id="mealsHost"></div>
+
+  </section>
+
+  <footer>Продержаться до пятницы — вполне реально.</footer>
+
+</div>
+
+<script>
+  const CATS = [
+    {name:"Хлеб и выпечка",      color:"#F2994A", tint:"#FBE4CC", emoji:"🍞"},
+    {name:"Молочное и яйца",     color:"#2FA8D9", tint:"#D9EEF8", emoji:"🥚"},
+    {name:"Белок",               color:"#E23E57", tint:"#FBDCE0", emoji:"🍖"},
+    {name:"Крупы и макароны",    color:"#C98A2A", tint:"#F0E0C2", emoji:"🌾"},
+    {name:"Овощи",               color:"#2FA84E", tint:"#D7F0DD", emoji:"🥕"},
+    {name:"Фрукты",              color:"#F0B429", tint:"#FBEBC7", emoji:"🍌"},
+    {name:"Заправки и приправы", color:"#8B5E3C", tint:"#E8DCCB", emoji:"🧂"},
+    {name:"Напитки и перекусы",  color:"#7C5CFC", tint:"#E4DEFB", emoji:"☕"}
+  ];
+
+  const KEYWORD_ICONS = [
+    [/хлеб/i, "🍞"], [/блин/i, "🥞"], [/яйц/i, "🥚"], [/молок/i, "🥛"],
+    [/сыр/i, "🧀"], [/сливочн/i, "🧈"], [/колбас/i, "🌭"], [/долма/i, "🥙"],
+    [/протеин/i, "💪"], [/гречк/i, "🌾"], [/\bрис\b/i, "🍚"],
+    [/спагетти|макарон/i, "🍝"], [/овсян/i, "🥣"], [/огур/i, "🥒"],
+    [/помидор/i, "🍅"], [/чеснок/i, "🧄"], [/\bлук\b/i, "🧅"],
+    [/банан/i, "🍌"], [/подсолнечн|раст.*масло/i, "🫒"],
+    [/соль|специ/i, "🧂"], [/кофе/i, "☕"], [/чай/i, "🍵"],
+    [/сухарик/i, "🍪"], [/ipa|пиво/i, "🍺"]
+  ];
+
+  function catInfo(catName){ return CATS.find(c=>c.name===catName) || CATS[0]; }
+
+  function getEmoji(name, catName){
+    const hit = KEYWORD_ICONS.find(([re]) => re.test(name || ""));
+    return hit ? hit[1] : catInfo(catName).emoji;
+  }
+
+  function emojiToCodepoints(emoji){
+    return Array.from(emoji).map(ch => ch.codePointAt(0).toString(16)).join('-');
+  }
+
+  function makeIconImg(emojiChar){
+    const img = document.createElement('img');
+    img.className = 'icon-img';
+    img.alt = '';
+    img.loading = 'lazy';
+    img.src = 'https://cdn.jsdelivr.net/npm/twemoji@14.0.2/assets/72x72/' + emojiToCodepoints(emojiChar) + '.png';
+    img.onerror = function(){
+      const span = document.createElement('span');
+      span.textContent = emojiChar;
+      span.style.fontSize = '16px';
+      if(img.parentNode){ img.replaceWith(span); }
+    };
+    return img;
+  }
+
+  function setIcon(iconEl, emojiChar){
+    iconEl.innerHTML = '';
+    iconEl.appendChild(makeIconImg(emojiChar));
+  }
+
+  const DAILY_TARGET_KCAL = 2000;
+
+  let idCounter = 1;
+  function nid(){ return 'it' + (idCounter++); }
+
+  let inventory = [
+    {id:nid(), category:"Хлеб и выпечка", name:"Белый хлеб (батон)", amount:"400 г"},
+    {id:nid(), category:"Хлеб и выпечка", name:"Блины с творогом", amount:"800 г"},
+
+    {id:nid(), category:"Молочное и яйца", name:"Яйца", amount:"7 шт"},
+    {id:nid(), category:"Молочное и яйца", name:"Молоко", amount:"900 мл"},
+    {id:nid(), category:"Молочное и яйца", name:"Сыр", amount:"80 г"},
+    {id:nid(), category:"Молочное и яйца", name:"Сливочное масло", amount:"немного"},
+
+    {id:nid(), category:"Белок", name:"Колбаса", amount:"400 г"},
+    {id:nid(), category:"Белок", name:"Долма", amount:"150 г"},
+    {id:nid(), category:"Белок", name:"Сухой протеин", amount:"300 г"},
+
+    {id:nid(), category:"Крупы и макароны", name:"Гречка", amount:"1 кг"},
+    {id:nid(), category:"Крупы и макароны", name:"Рис", amount:"1 кг"},
+    {id:nid(), category:"Крупы и макароны", name:"Спагетти", amount:"500 г"},
+    {id:nid(), category:"Крупы и макароны", name:"Овсяные хлопья", amount:"500 г"},
+
+    {id:nid(), category:"Овощи", name:"Огурцы", amount:"2 шт"},
+    {id:nid(), category:"Овощи", name:"Помидор", amount:"1 шт"},
+    {id:nid(), category:"Овощи", name:"Лук", amount:"1 шт"},
+    {id:nid(), category:"Овощи", name:"Чеснок", amount:"2 головки"},
+
+    {id:nid(), category:"Фрукты", name:"Бананы", amount:"1 кг"},
+
+    {id:nid(), category:"Заправки и приправы", name:"Подсолнечное масло", amount:"есть"},
+    {id:nid(), category:"Заправки и приправы", name:"Соль и специи", amount:"есть"},
+
+    {id:nid(), category:"Напитки и перекусы", name:"Кофе, чай, сахар", amount:"есть"},
+    {id:nid(), category:"Напитки и перекусы", name:"Ржаные сухарики с сёмгой и сыром", amount:"100 г"},
+    {id:nid(), category:"Напитки и перекусы", name:"Double IPA 7.6%", amount:"2 × 450 мл"}
+  ];
+
+  let dirty = false;
+  let currentActiveDay = 0;
+
+  let currentMenu = [
+    { breakfast:"Блины с творогом (плотная порция), банан, кофе", breakfast_kcal:600, lunch:"Долма и гречка, огурец с помидором", lunch_kcal:650, dinner:"Яичница из 3 яиц с колбасой, хлеб", dinner_kcal:550, total_kcal:1800 },
+    { breakfast:"Овсянка на молоке (двойная порция) с бананом", breakfast_kcal:500, lunch:"Рис с жареным луком и чесноком, остаток колбасы", lunch_kcal:650, dinner:"Блины с творогом (остаток), 2 яйца, хлеб", dinner_kcal:600, total_kcal:1750 },
+    { breakfast:"Овсянка с бананом и протеином на молоке", breakfast_kcal:450, lunch:"Гречка с луком и чесноком, специи", lunch_kcal:500, dinner:"Бутерброды с сыром и маслом, сухарики с сёмгой", dinner_kcal:550, total_kcal:1500 },
+    { breakfast:"Протеиновый коктейль на молоке, остатки овсянки", breakfast_kcal:350, lunch:"Спагетти с луком и чесноком на масле, специи", lunch_kcal:550, dinner:"Гречка, бутерброд с маслом", dinner_kcal:450, total_kcal:1350 },
+    { breakfast:"Протеин на молоке", breakfast_kcal:250, lunch:"Рис или гречка — что останется", lunch_kcal:450, dinner:"Спагетти с маслом и сыром, банан", dinner_kcal:550, total_kcal:1250 }
+  ];
+
+  function renderInventory(){
+    const host = document.getElementById('inventoryHost');
+    host.innerHTML = '';
+    CATS.forEach(cat=>{
+      const shelf = document.createElement('div');
+      shelf.className = 'shelf';
+
+      const title = document.createElement('p');
+      title.className = 'shelf-title';
+      const bar = document.createElement('span');
+      bar.className = 'bar';
+      bar.style.background = cat.color;
+      const label = document.createElement('span');
+      label.style.color = cat.color;
+      label.textContent = cat.name;
+      title.appendChild(bar);
+      title.appendChild(label);
+      shelf.appendChild(title);
+
+      inventory.filter(it=>it.category===cat.name).forEach(item=>{
+        shelf.appendChild(buildItemRow(item, cat));
+      });
+
+      const addLink = document.createElement('button');
+      addLink.type = 'button';
+      addLink.className = 'add-link';
+      addLink.textContent = '+ добавить продукт';
+      addLink.addEventListener('click', ()=>addItem(cat.name));
+      shelf.appendChild(addLink);
+
+      host.appendChild(shelf);
+    });
+  }
+
+  function buildItemRow(item, cat){
+    const row = document.createElement('div');
+    row.className = 'item-row';
+
+    const icon = document.createElement('span');
+    icon.className = 'icon-circle';
+    icon.style.background = cat.tint;
+    setIcon(icon, getEmoji(item.name, item.category));
+
+    const nameInput = document.createElement('input');
+    nameInput.className = 'name-input';
+    nameInput.type = 'text';
+    nameInput.placeholder = 'Название продукта';
+    nameInput.value = item.name;
+    nameInput.addEventListener('input', ()=>{
+      item.name = nameInput.value;
+      setIcon(icon, getEmoji(item.name, item.category));
+      markDirty();
+    });
+
+    const amountInput = document.createElement('input');
+    amountInput.className = 'amount-input';
+    amountInput.type = 'text';
+    amountInput.placeholder = 'кол-во';
+    amountInput.value = item.amount;
+    amountInput.addEventListener('input', ()=>{ item.amount = amountInput.value; markDirty(); });
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'delete-btn';
+    delBtn.setAttribute('aria-label', 'Удалить продукт');
+    delBtn.textContent = '✕';
+    delBtn.addEventListener('click', ()=>{
+      inventory = inventory.filter(i=>i.id!==item.id);
+      markDirty();
+      renderInventory();
+    });
+
+    row.appendChild(icon);
+    row.appendChild(nameInput);
+    row.appendChild(amountInput);
+    row.appendChild(delBtn);
+    return row;
+  }
+
+  function addItem(catName){
+    const item = {id:nid(), category:catName, name:'', amount:''};
+    inventory.push(item);
+    markDirty();
+    renderInventory();
+    const rows = document.querySelectorAll('#inventoryHost .item-row');
+    const last = rows[rows.length-1];
+    if(last){ last.querySelector('.name-input').focus(); }
+  }
+
+  function markDirty(){
+    dirty = true;
+    scheduleSaveInventory();
+  }
+
+  let invSaveTimer = null;
+  function scheduleSaveInventory(){
+    clearTimeout(invSaveTimer);
+    invSaveTimer = setTimeout(saveAll, 700);
+  }
+
+  function setSaveStatus(kind, text){
+    const el = document.getElementById('saveStatus');
+    if(!el) return;
+    el.className = 'save-status' + (kind ? ' ' + kind : '');
+    el.textContent = text;
+  }
+
+  const STORAGE_KEY = 'pantry-data';
+
+  function saveAll(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ inventory: inventory, currentMenu: currentMenu }));
+      setSaveStatus('ok', 'Сохранено в этом браузере');
+    }catch(e){
+      const msg = (e && e.message) ? e.message : String(e);
+      setSaveStatus('fail', 'Не удалось сохранить локально: ' + msg);
+    }
+  }
+
+  function loadSaved(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        if(parsed){
+          if(Array.isArray(parsed.inventory) && parsed.inventory.length){ inventory = parsed.inventory; }
+          if(Array.isArray(parsed.currentMenu) && parsed.currentMenu.length === 5){ currentMenu = parsed.currentMenu; }
+          setSaveStatus('ok', 'Загружены сохранённые данные');
+        }
+      }
+    }catch(e){ /* nothing saved yet, or storage blocked (e.g. private browsing) */ }
+  }
+
+  function renderMeals(dayIndex){
+    currentActiveDay = dayIndex;
+    const d = currentMenu[dayIndex];
+    const host = document.getElementById('mealsHost');
+    const totalBox = document.getElementById('dayTotal');
+    const totalEl = totalBox.querySelector('.dt-value');
+    host.innerHTML = '';
+    totalBox.classList.remove('good', 'low');
+
+    if(!d){ totalEl.textContent = '— ккал'; return; }
+
+    if(d.total_kcal){
+      totalEl.textContent = '≈' + d.total_kcal + ' / ' + DAILY_TARGET_KCAL + ' ккал';
+      if(d.total_kcal >= DAILY_TARGET_KCAL - 100){ totalBox.classList.add('good'); }
+      else if(d.total_kcal < DAILY_TARGET_KCAL - 300){ totalBox.classList.add('low'); }
+    } else {
+      totalEl.textContent = '— / ' + DAILY_TARGET_KCAL + ' ккал';
+    }
+
+    [
+      {key:'breakfast', kcalKey:'breakfast_kcal', label:'Завтрак', cls:'breakfast'},
+      {key:'lunch', kcalKey:'lunch_kcal', label:'Обед', cls:'lunch'},
+      {key:'dinner', kcalKey:'dinner_kcal', label:'Ужин', cls:'dinner'}
+    ].forEach(m=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'meal ' + m.cls;
+
+      const bar = document.createElement('div');
+      bar.className = 'meal-bar';
+
+      const body = document.createElement('div');
+      body.className = 'meal-body';
+
+      const label = document.createElement('p');
+      label.className = 'meal-label';
+      const labelText = document.createElement('span');
+      labelText.textContent = m.label;
+
+      const kcalInput = document.createElement('input');
+      kcalInput.className = 'meal-kcal-input';
+      kcalInput.type = 'number';
+      kcalInput.min = '0';
+      kcalInput.value = d[m.kcalKey] || '';
+      kcalInput.placeholder = 'ккал';
+      kcalInput.addEventListener('input', ()=>{
+        d[m.kcalKey] = parseInt(kcalInput.value, 10) || 0;
+        d.total_kcal = (d.breakfast_kcal||0) + (d.lunch_kcal||0) + (d.dinner_kcal||0);
+        renderMeals(currentActiveDay);
+        markDirty();
+      });
+
+      label.appendChild(labelText);
+      label.appendChild(kcalInput);
+
+      const textInput = document.createElement('input');
+      textInput.className = 'meal-text-input';
+      textInput.type = 'text';
+      textInput.value = d[m.key] || '';
+      textInput.placeholder = 'Что съесть';
+      textInput.addEventListener('input', ()=>{ d[m.key] = textInput.value; markDirty(); });
+
+      body.appendChild(label);
+      body.appendChild(textInput);
+      wrap.appendChild(bar);
+      wrap.appendChild(body);
+      host.appendChild(wrap);
+    });
+  }
+
+  document.querySelectorAll('.day-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderMeals(parseInt(btn.dataset.day, 10));
+    });
+  });
+
+  document.querySelectorAll('nav.tabs button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  const ioPanel = document.getElementById('ioPanel');
+  const ioText = document.getElementById('ioText');
+  const ioHint = document.getElementById('ioHint');
+  let ioMode = null;
+
+  document.getElementById('exportBtn').addEventListener('click', ()=>{
+    ioMode = 'export';
+    const note = document.getElementById('menuNote').textContent;
+    const snapshot = JSON.stringify({ inventory: inventory, currentMenu: currentMenu, note: note });
+    ioText.value = snapshot;
+    ioHint.textContent = 'Скопируйте этот текст и сохраните где-нибудь (например, в заметки). При следующем открытии вставьте его через «Импорт».';
+    document.getElementById('ioApplyBtn').style.display = 'none';
+    ioPanel.classList.add('show');
+    ioText.focus();
+    ioText.select();
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(snapshot).then(()=>{
+        ioHint.textContent = 'Скопировано в буфер обмена. Сохраните этот текст где-нибудь — при следующем открытии вставьте его через «Импорт».';
+      }).catch(()=>{ /* clipboard not available — text is already selected for manual copy */ });
+    }
+  });
+
+  document.getElementById('importBtn').addEventListener('click', ()=>{
+    ioMode = 'import';
+    ioText.value = '';
+    ioHint.textContent = 'Вставьте сюда текст, который вы ранее сохранили через «Экспорт», и нажмите «Применить».';
+    document.getElementById('ioApplyBtn').style.display = 'block';
+    ioPanel.classList.add('show');
+    ioText.focus();
+  });
+
+  document.getElementById('ioCloseBtn').addEventListener('click', ()=>{
+    ioPanel.classList.remove('show');
+  });
+
+  document.getElementById('ioApplyBtn').addEventListener('click', ()=>{
+    try{
+      const parsed = JSON.parse(ioText.value);
+      if(!parsed || !Array.isArray(parsed.inventory) || !Array.isArray(parsed.currentMenu)){
+        throw new Error('bad shape');
+      }
+      inventory = parsed.inventory;
+      currentMenu = parsed.currentMenu;
+      if(parsed.note){ document.getElementById('menuNote').textContent = parsed.note; }
+      renderInventory();
+      renderMeals(0);
+      document.querySelectorAll('.day-btn').forEach((b,i)=>b.classList.toggle('active', i===0));
+      ioPanel.classList.remove('show');
+      setSaveStatus('ok', 'Данные восстановлены из импорта');
+    }catch(e){
+      ioHint.textContent = 'Не получилось прочитать этот текст — проверьте, что он скопирован полностью, и попробуйте снова.';
+    }
+  });
+
+  loadSaved();
+  renderInventory();
+  renderMeals(0);
+</script>
+
+</body>
+</html>
